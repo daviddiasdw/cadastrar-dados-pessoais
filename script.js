@@ -1,4 +1,3 @@
-idAtual = 0
 
 elNome = $("#nome")
 elSobrenome = $("#sobrenome")
@@ -24,10 +23,8 @@ $("#finalizar").on('click', function () {
         return false
     }
 
-    novoId = gerarId(idAtual)
 
     novoCadastro = {
-        id: novoId,
         first_name: elNome.val(),
         last_name: elSobrenome.val(),
         email: elEmail.val(),
@@ -37,22 +34,11 @@ $("#finalizar").on('click', function () {
         zip_code: elCep.val()
     }
 
-    body = $("table > tbody")
+    $(".btn-limpar").click()
 
-    novaLinha = "<tr>\n" +
-        "<th scope=\"row\">" + novoCadastro.id + "</th>\n" +
-        "<td>" + novoCadastro.first_name + "</td>\n" +
-        "<td>" + novoCadastro.last_name + "</td>\n" +
-        "<td>" + novoCadastro.email + "</td>\n" +
-        "<td>" + novoCadastro.telephone + "</td>\n" +
-        "<td>" + novoCadastro.city + "</td>\n" +
-        "<td>" + novoCadastro.state + "</td>\n" +
-        "<td>" + novoCadastro.zip_code + "</td>\n" +
-        "</tr>"
+    cadastrarPessoa(novoCadastro)
 
-    body.append(novaLinha)
-
-$(".btn-limpar").click()
+    inserirDadosTabela(novoCadastro)
 
 })
 
@@ -79,11 +65,6 @@ function validarFormulario() {
     return valor
 }
 
-function gerarId(id) {
-    soma = id + 1
-    return idAtual = soma
-}
-
 function validarCampo(el, elErro) {
 
     if ( el.val() == "") {
@@ -91,3 +72,69 @@ function validarCampo(el, elErro) {
         valor = false
     }
 }
+
+function cadastrarPessoa(novoCadastro) {
+
+    $.ajax({
+        method: "POST",
+        data: JSON.stringify(novoCadastro),
+        url: "https://cadastrar-dados-pessoais.firebaseio.com/pessoas.json",
+        //crossDomain: true,
+        dataType: 'json',
+        Accept: 'application/json',
+        beforeSend: function() {
+            console.log("start");
+        }
+    }).done(function (data) {
+      console.log(data)
+    }).fail(function (error) {
+        console.log(error)
+    }).always(function () {
+       // console.log("complete")
+    })
+    
+}
+
+function listarDadosPessoais(){
+
+    $.ajax({
+        method: "GET",
+        url: "https://cadastrar-dados-pessoais.firebaseio.com/pessoas.json",
+        dataType: "json",
+        accept: "application/json",
+        beforeSend: function () {
+            //console.log("start")
+        }
+    }).done(function (data){
+
+        $.each(data,function(key, pessoa){
+            inserirDadosTabela(pessoa)
+        })
+
+    }).fail(function (error) {
+        console.log(error)
+    }).always(function(){
+        // console.log("Ok")
+    })
+
+}
+
+function inserirDadosTabela(pessoa){
+console.log(pessoa)
+    body = $("table > tbody")
+
+    novaLinha = "<tr>\n" +
+        "<th scope=\"row\">" +"."+ "</th>\n" +
+        "<td>" + pessoa.first_name + "</td>\n" +
+        "<td>" + pessoa.last_name + "</td>\n" +
+        "<td>" + pessoa.email + "</td>\n" +
+        "<td>" + pessoa.telephone + "</td>\n" +
+        "<td>" + pessoa.city + "</td>\n" +
+        "<td>" + pessoa.state + "</td>\n" +
+        "<td>" + pessoa.zip_code + "</td>\n" +
+        "</tr>"
+
+    body.append(novaLinha)
+}
+
+listarDadosPessoais()
